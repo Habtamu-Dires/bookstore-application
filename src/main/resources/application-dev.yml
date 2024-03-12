@@ -1,0 +1,47 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost/bookstore1
+    username: habt
+    password: password
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: false
+
+  mail:
+    host: localhost
+    port: 1025
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            scope:
+              - profile
+              - user:read
+              - user:email
+            clientId: #{github-secretId}
+            clientSecret: #{github-client-secret}
+          GOOGLE:
+            scope:
+              - profile
+              - email
+            clientId: #{google-clientId}
+            clientSecret: #{google-clint-secret}
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
+
