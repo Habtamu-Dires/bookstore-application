@@ -4,6 +4,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -28,6 +29,7 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorize -> authorize
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                 .requestMatchers(HttpMethod.POST, "/login").permitAll()
                 .requestMatchers("/register").permitAll()
                 .requestMatchers("/registration/**").permitAll()
@@ -39,13 +41,13 @@ public class SecurityConfig {
         http.formLogin(login -> login
                 .loginPage("/login").permitAll()
                 .failureUrl("/login-error")
-                .defaultSuccessUrl("/home", true)
+                .defaultSuccessUrl("/", true)
         );
 
         http.oauth2Login(oauth2Login -> oauth2Login
                 .loginPage("/login").permitAll()
                 .failureUrl("/login-error")
-                .defaultSuccessUrl("/home", true)
+                .defaultSuccessUrl("/", true)
                 .userInfoEndpoint(userInfoEndPoint -> userInfoEndPoint
 //                        .oidcUserService(customOidcUserService)
                         .userService(customOAuth2UserService)

@@ -21,6 +21,21 @@ public class BookController {
     private final BookService service;
     private final UserService userService;
 
+    @GetMapping
+    public String index(Model model){
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userService.findUserByEmail(email);
+        Collection<? extends GrantedAuthority> authorities =
+                SecurityContextHolder.getContext().getAuthentication().getAuthorities();
+
+        boolean admin = authorities.contains(new SimpleGrantedAuthority("ADMIN"));
+
+        model.addAttribute("username", user.getFirstName());
+        model.addAttribute("admin", admin);
+
+        return "index";
+    }
+
     @GetMapping("/home")
     public String home(Model model){
 
@@ -102,7 +117,7 @@ public class BookController {
         return "my_books";
     }
 
-    @RequestMapping("/books/{id}")
+    @RequestMapping("/add-book/{id}")
     public String addToMyBook(@PathVariable("id") Integer id){
         Book book = service.getBookById(id);
         if(book != null){
@@ -111,7 +126,19 @@ public class BookController {
             userService.addBook(user.getId(), book);
         }
 
-        return "redirect:/my-books";
+        return "redirect:/available-books";
+    }
+
+    @RequestMapping("/remove-book/{id}")
+    public String removeFromMyBook(@PathVariable("id") Integer id){
+        Book book = service.getBookById(id);
+        if(book != null){
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            User user = userService.findUserByEmail(email);
+            userService.removeBook(user.getId(), book);
+        }
+
+        return "redirect:/available-books";
     }
 
     @RequestMapping("/remove/{id}")
@@ -127,6 +154,7 @@ public class BookController {
 
     @PostMapping("/save-book")
     public String addBook(@ModelAttribute Book book){
+
         service.save(book);
         return "redirect:/available-books";
     }
@@ -151,6 +179,21 @@ public class BookController {
     public String deleteBook(@PathVariable Integer id){
         service.deleteBookById(id);
         return "redirect:/available-books";
+    }
+
+    //price validation when registering book
+    @PostMapping("/validate-price")
+    @ResponseBody
+    public String validatePrice(@ModelAttribute("price") String price){
+        try{
+            double p = Double.parseDouble(price);
+            return "<span></span>";
+        } catch (Exception e){
+            return
+                    """
+                        <span style="color: red;">Invalid Price</span>
+                    """;
+        }
     }
 
 }
